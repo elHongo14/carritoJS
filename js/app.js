@@ -1,76 +1,84 @@
-console.log('conectau')
+console.log("conectau");
 const cards = document.getElementById('cards')
 const items = document.getElementById('items')
 const footer = document.getElementById('footer')
 const templateCard = document.getElementById('template-card').content
 const templateFooter = document.getElementById('template-footer').content
 const templateCarrito = document.getElementById('template-carrito').content
+
 const fragment = document.createDocumentFragment()
+
+
 let carrito = {}
 
-document.addEventListener('DOMContentLoaded', () => {
-    obtenerProductos()
-    if(localStorage.getItem('carrito')){
-        carito =JSON.parse(localStorage.getItem('carrito'))
-        pintarCarrito()
-    }
+document.addEventListener('DOMContentLoaded', e =>{
+  obtenerProductos()
+  if(localStorage.getItem('carrito')){
+	carrito = JSON.parse(localStorage.getItem('carrito'))
+	pintarCarrito()
+  }
 })
 
 cards.addEventListener('click', (e) => {
-    addCarrito(e)
+	//console.log(e)
+	addCarrito(e)
 })
 
 items.addEventListener('click', (e) => {
-    btnAcciones(e)
+	btnAcciones(e)
 })
-
 const btnAcciones = e => {
-    if(e.target.classList.contains('btn-info')){
-        const producto = carrito[e.target.dataset.id]
-        producto.cantidad++
-        carrito[e.target.dataset.id] = { ...producto}
-        pintarCarrito()
-    }
-
-    if(e.target.classList.contains('btn-danger')){
-        const producto = carrito[e.target.dataset.id]
-        producto.cantidad--
-        if(producto.cantidad === 0){
-            delete carrito[e.target.dataset.id]
-        }else{
-            carrito[e.target.dataset.id] = { ...producto}
-        }
-        pintarCarrito()
-    }
-    e.stopPropagation()
-} 
+	if(e.target.classList.contains('btn-info'))
+	{
+		const producto = carrito[e.target.dataset.id]
+		producto.cantidad++
+		carrito[e.target.dataset.id] = {...producto}
+		pintarCarrito()
+	}
+	if(e.target.classList.contains('btn-danger'))
+	{
+		const producto = carrito[e.target.dataset.id]
+		producto.cantidad--
+		if(producto.cantidad === 0)
+		delete carrito[e.target.dataset.id]
+		else{
+			carrito[e.target.dataset.id] = {...producto}
+		}
+		
+		pintarCarrito()
+	}
+	e.stopPropagation()
+}
 
 const addCarrito = (e) => {
-    if(e.target.classList.contains('btn-dark')){
-        setCarrito(e.target.parentElement)
-    }
-    e.stopPropagation()
+	if(e.target.classList.contains('btn-dark')){
+		//alert('boton')
+		setCarrito(e.target.parentElement)
+	}
+	e.stopPropagation()
 }
 
 const setCarrito = (item) => {
+	//console.log(item)
 	const producto = {
 		title: item.querySelector('h5').textContent,
 		precio: item.querySelector('p').textContent,
 		id: item.querySelector('button').dataset.id,
 		cantidad: 1
 	}
+		//console.log(producto)
 
 		if(carrito.hasOwnProperty(producto.id)){
 			producto.cantidad = carrito[producto.id].cantidad + 1
 		}
 		carrito[producto.id] = {...producto}
 		pintarCarrito()
+		//console.log(carrito)
 }
 
 const pintarCarrito = () => {
 	items.innerHTML = ''
 	Object.values(carrito).forEach(item => {
-
 		templateCarrito.querySelector('th').textContent = item.id
 		templateCarrito.querySelectorAll('td')[0].textContent = item.title
 		templateCarrito.querySelectorAll('td')[1].textContent = item.cantidad
@@ -99,10 +107,10 @@ const pintarFooter = () => {
 	}
 
 	const nCantidad = Object.values(carrito).reduce((
-		acc, {cantidad}
+		acc, { cantidad}
 	) => acc + cantidad, 0)
 	const nPrecio = Object.values(carrito).reduce((
-		acc, {cantidad, precio}
+		acc, { cantidad, precio}
 	) => acc + (cantidad * precio), 0)
 	templateFooter.querySelectorAll('td')[0].textContent = nCantidad
 	templateFooter.querySelector('span').textContent = nPrecio
@@ -118,20 +126,22 @@ const pintarFooter = () => {
 	})
 }
 
-const obtenerProductos = async () => {
-        const res = await fetch('./api/productos.json')
-        const data = await res.json()
-        //console.log(data)
-        pintarCards(data)
+const obtenerProductos = async() => {
+  const res = await fetch('./api/productos.json')
+	const data = await res.json()
+	//console.log(data)
+	pintarCards(data)
 }
 
 const pintarCards = (data) => {
-    data.forEach(item => {
-        templateCard.querySelector('h5').textContent = item.title
-        templateCard.querySelector('p').textContent = item.precio
-        templateCard.querySelector('button').dataset.id = item.id
-        const clone = templateCard.cloneNode(true)
-        fragment.appendChild(clone)
-    })
-    cards.appendChild(fragment)
+	data.forEach(item => {
+		templateCard.querySelector('h5').textContent = item.title 
+		templateCard.querySelector('p').textContent = item.precio 
+		templateCard.querySelector('img').setAttribute('src',item.url)
+		templateCard.querySelector('button').dataset.id = item.id 
+
+		const clone = templateCard.cloneNode(true)
+		fragment.appendChild(clone)
+	})
+	cards.appendChild(fragment)
 }
